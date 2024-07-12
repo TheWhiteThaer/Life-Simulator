@@ -1,0 +1,44 @@
+{
+  "Heterosexual": {
+    "rgb": [0, 0, 0]
+  },
+  "Gay": {
+    "rgb": [135, 206, 235]
+  },
+  "Lesbian": {
+    "rgb": [255, 105, 180]
+  },
+  "Bisexual": {
+    "rgb": [128, 0, 128]
+  },
+  "Asexual": {
+    "rgb": [169, 169, 169]
+  },
+  "Pansexual": {
+    "rgb": [255, 182, 193]
+  },
+  "Demisexual": {
+    "rgb": [105, 105, 105]
+  },
+  "Polysexual": {
+    "rgb": [0, 255, 255]
+  },
+  "Omnisexual": {
+    "rgb": [255, 69, 0]
+  },
+  "Androsexual": {
+    "rgb": [0, 0, 255]
+  },
+  "Gynosexual": {
+    "rgb": [255, 20, 147]
+  },
+  "Queer": {
+    "rgb": [255, 0, 255]
+  },
+  "AroAce": {
+    "rgb": [0, 255, 127]
+  },
+  "Aromantic": {
+    "rgb": [60, 179, 113]
+  }
+}

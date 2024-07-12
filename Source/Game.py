@@ -2,12 +2,16 @@ import pygame
 
 class Game():
     
+    #Restarting
     restart = False
 
-    direction = 0
-
     #Selecting Modes
-    curSelected = 0
+    curSexuality = 0
+
+    curHuman = 0
+
+    #Id Stuff
+    canShowID = False
 
 
     def __init__(self, width, height, FPS, title) -> None:
@@ -40,14 +44,22 @@ class Game():
                         self.restart = True
 
                     if event.key == pygame.K_LEFT:
-                        self.curSelected -= 1
+                        self.changeSexuality(-1)
                                         
-                        if self.curSelected < 0:
-                            self.curSelected = len(self.Sexualities) - 1
-                    elif event.key == pygame.K_RIGHT:                        
-                        self.curSelected += 1
-                        if self.curSelected > len(self.Sexualities) - 1:
-                                self.curSelected = 0
+                      
+                    elif event.key == pygame.K_RIGHT:
+                        self.changeSexuality(1)
+
+                    if event.key == pygame.K_d:
+                        self.changeHuman(1)
+                                        
+                      
+                    elif event.key == pygame.K_a:                 
+                        self.changeHuman(-1)
+
+                    if event.key == pygame.K_h:
+                        self.canShowID = not self.canShowID
+                      
                        
             self.displaysurface.fill((255, 255, 255))
             self.update()
@@ -59,3 +71,21 @@ class Game():
 
     def create(self):
         pass
+
+
+    def changeSexuality(self, huh):
+        self.curSexuality += huh
+
+        if self.curSexuality > len(self.Sexualities) - 1:
+                self.curSexuality = 0
+        if self.curSexuality < 0:
+                self.curSexuality = len(self.Sexualities) - 1
+
+
+    def changeHuman(self, huh):
+        self.curHuman += huh
+
+        if self.curHuman > len(self.Humans) - 1:
+                self.curHuman = 0
+        if self.curHuman < 0:
+                self.curHuman = len(self.Humans) - 1

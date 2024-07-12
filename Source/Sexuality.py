@@ -2,37 +2,37 @@ import random as random
 
 
 
-
-def figureSexuality():
-    chanceOfBeinAroAce = random.randint(0, 101)
-    if chanceOfBeinAroAce == 1:
-        return "AroAce"
-    
-
-    chanceOfBeingGay = random.randint(0, 101)
-    if chanceOfBeingGay > 6:
+def figureSexuality(gender):
+    # Determine heterosexuality
+    if random.randint(0, 100) > 20:
         return "Heterosexual"
     
-    
-    chanceOfBeingBiOrHomo = random.randint(0, 101)
-    if chanceOfBeingBiOrHomo < 80:
+    # Determine AroAce
+    if random.randint(0, 200) == 1:
+        return "AroAce"
+
+    # Determine bisexuality
+    if random.randint(0, 100) < 60:
         return "Bisexual"
 
-    chanceOfBeingGayOrLesbian = random.randint(0, 101)
-    if chanceOfBeingGayOrLesbian < 70:
+    # Determine gay or lesbian based on gender
+    if gender == "male":
         return "Gay"
-    else:
+    
+    elif gender == "female":
         return "Lesbian"
+    else:
+        return "Gay"
+   
 
 
 
-
-def aPeople():
+def aPeople(gender):
     chancesOfBeingAsexual = random.randint(0, 101)
     if chancesOfBeingAsexual == 1:
-        return figureSexuality() + f" [ASexual]"
+        return figureSexuality(gender) + f" [ASexual]"
     elif chancesOfBeingAsexual == 2:
-        return figureSexuality() + f" [ARomantical]"
+        return figureSexuality(gender) + f" [ARomantical]"
     else:
-        return figureSexuality()
+        return figureSexuality(gender)
     

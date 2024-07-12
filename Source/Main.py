@@ -1,9 +1,12 @@
 import pygame #type: ignore
 from pygame.locals import * # type: ignore
-import Human as Human
-import random as random 
-import Game as Game
+import Human
+import random
+import Game
 import CalculationUtils
+import Window
+import json
+import colorsys
 
 
 class Main(Game.Game):
@@ -12,10 +15,6 @@ class Main(Game.Game):
     HumansNumber = None
     Humans = None
     
-
-    #TODO: Make The Names, Age, ... etc in a json file
-    NAMES = None
-
 
     # Counter #
     Counter = None
@@ -29,41 +28,29 @@ class Main(Game.Game):
     YAdd = 50
 
     # Multiplayers #
-    RadiusMultiplayer = 15
-
-    #Temps
-    done = False
+    RadiusMultiplayer = 1
 
 
-    # Text
-    font = None
-    CounterText = None
+    # Fonts
+    normalFont = None
+    pixelSans = None
+
+    radius = None
 
 
 
     def __init__(self, width, height, FPS, title):
         self.init_variables()
-        self.addHumans(self.HumansNumber, self.NAMES, 0, 51, self.Humans)
+        self.addHumans(self.HumansNumber, self.Humans)
         super().__init__(width, height, FPS, title)
 
     def init_variables(self):
         # Humans #
         self.HumansNumber = 100
-
-        self.Humans = []
         
 
-        #TODO: Make The Names, Age, ... etc in a json file
-        self.NAMES = [
-            "Alex",
-            "Maria",
-            "Mary",
-            "Hot Dog",
-            "Max",
-            "David",
-            "Sara"
-        ]
-
+        self.Humans = []
+    
 
         # Counter #
         self.Counter = {
@@ -83,69 +70,121 @@ class Main(Game.Game):
             'AroAce'
         ]
 
-    def addHumans(self, numberOfPoeple, Names, MinAge, MaxAge, List):
+    
+    
+    def addHumans(self, numberOfPoeple, List):
         for i in range(0, numberOfPoeple):
-            newHuman = Human.Human(random.choice(Names), random.randint(MinAge, MaxAge))
+            newHuman = Human.Human()
             List.append(newHuman)
         
     
     def restartSimulation(self):
         self.Humans = []
         self.init_variables()
-        self.addHumans(self.HumansNumber, self.NAMES, 0, 51, self.Humans)
+        self.addHumans(self.HumansNumber, self.Humans)
         CalculationUtils.People_Counter_Based_On_Sexuality(self.Humans, self.Counter)
         self.calculated = False
         self.restart = False
 
     def create(self):
-        self.font = pygame.font.Font('freesansbold.ttf', 32)
+        self.normalFont = pygame.font.Font('freesansbold.ttf', 32)
+        self.pixelSans = pygame.font.Font('Assets/Fonts/SansPixels.ttf', 22)
         CalculationUtils.People_Counter_Based_On_Sexuality(self.Humans, self.Counter)
+        
         return super().create()
     
 
-    def update(self):
-        
+    
+
+    def HumanManager(self):
         HumanYPosition = 0
         HumanXPosition = 0
-        
-        #Calculating The Max Circ Border
-        radius = CalculationUtils.Calculate_Radius_Based_On_Number(self.HumansNumber) * self.RadiusMultiplayer
-
-        diameter = 2 * radius
-        
-        num_circles_per_row = int(self.width // diameter)
-        
-        
+        NumberOfPoepleInARow = CalculationUtils.Calculate_Number_Of_People_On_A_Row(self.radius, self.HumansNumber)
+        NumberOfPoepleInAColum = 5
         for i in range(len(self.Humans)):
-            # Move to the next row every 15 humans
-            # r = 9.085046112998343
-            # w = 1280
-            #
-            if i % 15 == 0:
-                HumanYPosition += 50 * ((radius / self.RadiusMultiplayer) / 1.5)
+            if i % NumberOfPoepleInARow == 0:
+                HumanYPosition += (Window.HEIGHT - self.radius * 2) /  NumberOfPoepleInAColum
                 HumanXPosition = 0
 
-            HumanXPosition += self.XAdd * ((radius / self.RadiusMultiplayer)  + 0.01)
+            HumanXPosition += (Window.WIDTH - self.radius * 2) /  NumberOfPoepleInARow
+            
+            pygame.draw.circle(self.displaysurface, self.Humans[i].color, (HumanXPosition, HumanYPosition), int(self.radius))
+            self.Humans[i].x = HumanXPosition
+            self.Humans[i].y = HumanYPosition
 
-            # Update the x position for the next human in the row
-            # Draw the circle
-            self.Humans[i].AI()
-            pygame.draw.circle(self.displaysurface, self.Humans[i].color, (HumanXPosition, HumanYPosition), int(radius))
-            self.CounterText = self.font.render(
-                f'The Number Of {self.Sexualities[self.curSelected]} People Is {self.Counter[self.Sexualities[self.curSelected]]}', 
+    def IDInfo(self, IDPosition):
+        Texts = [
+            ["Name", self.Humans[self.curHuman].Name],
+            ["Age", self.Humans[self.curHuman].Age],
+            ["Gender", self.Humans[self.curHuman].Gender],
+            ["Religion", self.Humans[self.curHuman].Religion],
+            ["Skin Color", self.Humans[self.curHuman].SkinColor],
+            ["Sexuality", self.Humans[self.curHuman].Sexuality]
+        ]
+
+        TextPosition = [IDPosition[0] + 250, 230]
+        for i in range(0, len(Texts)):
+            TextPosition[1] += 30
+            Text = self.pixelSans.render(
+                f'{Texts[i][0]} : {Texts[i][1]}', 
                 True, 
                 (0, 0, 0)
             )
-        self.displaysurface.blit(self.CounterText ,(0, 680))
+            self.displaysurface.blit(Text, TextPosition)
+
+    def update(self):
+
+
+        #Calculating The Max Circ Border
+        self.radius = CalculationUtils.Calculate_Radius_Based_On_Number(self.HumansNumber) * self.RadiusMultiplayer
+
+        self.HumanManager()
+       
+
+        CounterText = self.normalFont.render(
+            f'The Number Of {self.Sexualities[self.curSexuality]} People Is {self.Counter[self.Sexualities[self.curSexuality]]}', 
+            True, 
+            (0, 0, 0)
+        )
+        self.displaysurface.blit(CounterText, (0, 600))
         
+        
+        
+ 
+        circleSelector = pygame.Surface((Window.WIDTH, Window.HEIGHT))
+        circleSelector.set_colorkey((0,0,0))
+        circleSelector.set_alpha(128)
+        pygame.draw.circle(circleSelector, (0,1,0), (self.Humans[self.curHuman].x, self.Humans[self.curHuman].y), int(self.radius) + 3)
+        self.displaysurface.blit(circleSelector, (0, 0))
+
+
+        ID = pygame.image.load(f"Assets/Images/{str.capitalize(self.Humans[self.curHuman].Gender)}ID.png")
+        ID = pygame.transform.scale(ID, (128 * 5, 64 * 5))
+
+
+
+        IDPosition = (
+            Window.WIDTH / 2 - ID.get_width() / 2, 
+            Window.HEIGHT / 2 - ID.get_height() / 2
+        )
+
+        
+
+        if not self.canShowID:
+            IDPosition = (
+                10000,
+                10000
+            )
+        
+        self.displaysurface.blit(
+            ID,
+            IDPosition
+        )
+
+        self.IDInfo(IDPosition)
+
         if self.restart:
             self.restartSimulation()
-            
-        if not self.done:
-            for i in range(0, len(self.Humans)):
-                if self.Humans[i].sexuality in self.Counter:
-                    pass
-            self.done = True
 
 
         super().update()
@@ -153,5 +192,5 @@ class Main(Game.Game):
 
 
 if __name__ == "__main__":
-    game = Main(1280, 720, 60, "Game")
+    game = Main(Window.WIDTH, Window.HEIGHT, 60, "Sexuality Simulator")
     game.run()
