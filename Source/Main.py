@@ -96,21 +96,26 @@ class Main(Game.Game):
 
     
 
-    def HumanManager(self):
-        HumanYPosition = 0
-        HumanXPosition = 0
-        NumberOfPoepleInARow = CalculationUtils.Calculate_Number_Of_People_On_A_Row(self.radius, self.HumansNumber)
-        NumberOfPoepleInAColum = 5
-        for i in range(len(self.Humans)):
-            if i % NumberOfPoepleInARow == 0:
-                HumanYPosition += (Window.HEIGHT - self.radius * 2) /  NumberOfPoepleInAColum
-                HumanXPosition = 0
+    def HumanManager(self, AIMode = "AI"):
+        if AIMode == "Standing Still":
+            HumanYPosition = 0
+            HumanXPosition = 0
+            NumberOfPoepleInARow = CalculationUtils.Calculate_Number_Of_People_On_A_Row(self.radius, self.HumansNumber)
+            NumberOfPoepleInAColum = 5
+            for i in range(len(self.Humans)):
+                if i % NumberOfPoepleInARow == 0:
+                    HumanYPosition += (Window.HEIGHT - self.radius * 2) /  NumberOfPoepleInAColum
+                    HumanXPosition = 0
 
-            HumanXPosition += (Window.WIDTH - self.radius * 2) /  NumberOfPoepleInARow
-            
-            pygame.draw.circle(self.displaysurface, self.Humans[i].color, (HumanXPosition, HumanYPosition), int(self.radius))
-            self.Humans[i].x = HumanXPosition
-            self.Humans[i].y = HumanYPosition
+                HumanXPosition += (Window.WIDTH - self.radius * 2) /  NumberOfPoepleInARow
+                
+                pygame.draw.circle(self.displaysurface, self.Humans[i].color, (HumanXPosition, HumanYPosition), int(self.radius))
+                self.Humans[i].x = HumanXPosition
+                self.Humans[i].y = HumanYPosition
+        else:
+            return
+
+
 
     def IDInfo(self, IDPosition):
         Texts = [
@@ -132,25 +137,10 @@ class Main(Game.Game):
             )
             self.displaysurface.blit(Text, TextPosition)
 
-    def update(self):
 
 
-        #Calculating The Max Circ Border
-        self.radius = CalculationUtils.Calculate_Radius_Based_On_Number(self.HumansNumber) * self.RadiusMultiplayer
-
-        self.HumanManager()
-       
-
-        CounterText = self.normalFont.render(
-            f'The Number Of {self.Sexualities[self.curSexuality]} People Is {self.Counter[self.Sexualities[self.curSexuality]]}', 
-            True, 
-            (0, 0, 0)
-        )
-        self.displaysurface.blit(CounterText, (0, 600))
-        
-        
-        
- 
+    def IDLogic(self):
+         
         circleSelector = pygame.Surface((Window.WIDTH, Window.HEIGHT))
         circleSelector.set_colorkey((0,0,0))
         circleSelector.set_alpha(128)
@@ -183,6 +173,23 @@ class Main(Game.Game):
 
         self.IDInfo(IDPosition)
 
+    def update(self):
+
+
+        #Calculating The Max Circ Border
+        self.radius = CalculationUtils.Calculate_Radius_Based_On_Number(self.HumansNumber) * self.RadiusMultiplayer
+
+        self.HumanManager("Standing Still")
+
+        CounterText = self.normalFont.render(
+            f'The Number Of {self.Sexualities[self.curSexuality]} People Is {self.Counter[self.Sexualities[self.curSexuality]]}', 
+            True, 
+            (0, 0, 0)
+        )
+        self.displaysurface.blit(CounterText, (0, 600))
+        
+        self.IDLogic()
+
         if self.restart:
             self.restartSimulation()
 
@@ -192,5 +199,5 @@ class Main(Game.Game):
 
 
 if __name__ == "__main__":
-    game = Main(Window.WIDTH, Window.HEIGHT, 60, "Sexuality Simulator")
+    game = Main(Window.WIDTH, Window.HEIGHT, Window.FPS, Window.TITLE)
     game.run()
