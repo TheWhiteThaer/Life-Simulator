@@ -2,7 +2,7 @@ import random as random
 
 
 
-def figureSexuality(gender):
+def BaseSexuality(gender):
     # Determine heterosexuality
     if random.randint(0, 100) > 20:
         return "Heterosexual"
@@ -27,12 +27,12 @@ def figureSexuality(gender):
 
 
 
-def aPeople(gender):
+def GetSexuality(gender):
     chancesOfBeingAsexual = random.randint(0, 101)
     if chancesOfBeingAsexual == 1:
-        return figureSexuality(gender) + f" [ASexual]"
+        return BaseSexuality(gender) + f" [ASexual]"
     elif chancesOfBeingAsexual == 2:
-        return figureSexuality(gender) + f" [ARomantical]"
+        return BaseSexuality(gender) + f" [ARomantical]"
     else:
-        return figureSexuality(gender)
+        return BaseSexuality(gender)
     

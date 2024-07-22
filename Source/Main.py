@@ -6,7 +6,7 @@ import Game
 import CalculationUtils
 import Window
 import json
-import colorsys
+import Sexuality
 
 
 class Main(Game.Game):
@@ -21,14 +21,6 @@ class Main(Game.Game):
     Sexualities = None
     calculated = False
 
-
-
-    # Positions #
-    XAdd = 50
-    YAdd = 50
-
-    # Multiplayers #
-    RadiusMultiplayer = 1
 
 
     # Fonts
@@ -74,7 +66,21 @@ class Main(Game.Game):
     
     def addHumans(self, numberOfPoeple, List):
         for i in range(0, numberOfPoeple):
-            newHuman = Human.Human()
+            # Load human data from JSON file
+            with open("Data/Humans.json") as file:
+                humans = json.load(file)
+            
+            human = random.choice(humans)
+
+            newHuman = Human.Human(
+                human['name'],
+                human['age'],
+                human['skin_color'],
+                human['eye_color'],
+                human['gender'],
+                Sexuality.GetSexuality(human['gender']),
+                random.choice(["Muslim", "Chrisitain", "Jew"])
+            )
             List.append(newHuman)
         
     
@@ -110,11 +116,12 @@ class Main(Game.Game):
                 HumanXPosition += (Window.WIDTH - self.radius * 2) /  NumberOfPoepleInARow
                 
                 pygame.draw.circle(self.displaysurface, self.Humans[i].color, (HumanXPosition, HumanYPosition), int(self.radius))
-                self.Humans[i].x = HumanXPosition
-                self.Humans[i].y = HumanYPosition
+                self.Humans[i].Position.x = HumanXPosition
+                self.Humans[i].Position.y = HumanYPosition
         else:
-            return
-
+            for i in range(len(self.Humans)):
+                self.Humans[i].AI()
+                pygame.draw.circle(self.displaysurface, self.Humans[i].color, (self.Humans[i].Position.x, self.Humans[i].Position.y), int(self.radius))
 
 
     def IDInfo(self, IDPosition):
@@ -144,7 +151,15 @@ class Main(Game.Game):
         circleSelector = pygame.Surface((Window.WIDTH, Window.HEIGHT))
         circleSelector.set_colorkey((0,0,0))
         circleSelector.set_alpha(128)
-        pygame.draw.circle(circleSelector, (0,1,0), (self.Humans[self.curHuman].x, self.Humans[self.curHuman].y), int(self.radius) + 3)
+        pygame.draw.circle (
+            circleSelector, #Surface 
+            (0, 1, 0), #Color
+            (
+                self.Humans[self.curHuman].Position.x, # X Position
+                self.Humans[self.curHuman].Position.y  # Y Position
+            ),
+            int(self.radius) + 3 # Radius
+        )
         self.displaysurface.blit(circleSelector, (0, 0))
 
 
@@ -177,9 +192,9 @@ class Main(Game.Game):
 
 
         #Calculating The Max Circ Border
-        self.radius = CalculationUtils.Calculate_Radius_Based_On_Number(self.HumansNumber) * self.RadiusMultiplayer
+        self.radius = CalculationUtils.Calculate_Radius_Based_On_Number(self.HumansNumber)
 
-        self.HumanManager("Standing Still")
+        self.HumanManager("Normal")
 
         CounterText = self.normalFont.render(
             f'The Number Of {self.Sexualities[self.curSexuality]} People Is {self.Counter[self.Sexualities[self.curSexuality]]}', 
@@ -193,6 +208,8 @@ class Main(Game.Game):
         if self.restart:
             self.restartSimulation()
 
+        self.Humans[self.curHuman].Position.x = Window.WIDTH / int(self.radius) * 6
+        self.Humans[self.curHuman].Position.y = Window.HEIGHT / int(self.radius) * 6
 
         super().update()
     

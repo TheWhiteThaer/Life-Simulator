@@ -1,76 +1,87 @@
-import Sexuality
 import random
-from threading import Timer
-import pygame
-import Window
 import json
-class Human():
+import time
+from Vectors import Vector2  # Corrected import
+import Sexuality  # Assuming Sexuality.GetSexuality is defined elsewhere
+import Window  # Assuming Window has WIDTH and HEIGHT constants
 
-    def __init__(self) -> None:
-        FileContent = open("Data/Humans.json")
-        jsonFile = json.load(FileContent)
-        randomProp = random.randint(0, len(jsonFile) - 1)
-        self.Name = jsonFile[randomProp]["name"]
-        self.Age = jsonFile[randomProp]["age"]
-        self.SkinColor = jsonFile[randomProp]["skin_color"]
-        self.EyeColor = jsonFile[randomProp]["eye_color"]
-        self.Gender = jsonFile[randomProp]["gender"]
-        self.Religion = "Muslim" #For Now
-        self.Sexuality = Sexuality.aPeople(jsonFile[randomProp]["gender"])
-
-        self.x = 0
-        self.y = 0
-
-
-        # self.XDirection = 1
-        # self.YDirection = 1
-
-        # self.Move = random.choice([True, False])
-        # self.MoveDown = random.choice([True, False])
-
-        # self.MovingX = random.randint(0, 2)
-        # self.MovingY = random.random()
-
-
-
-
-
-        colorsFile = open("Data/SexualitiesColor.json")
-        colors = json.load(colorsFile)
-
-        self.color = (255, 255, 255)
+class Human:
+    def __init__(self, Name, Age, SkinColor, EyeColor, Gender, Sexuality, Religion) -> None:
         
-        if "ASexual" in self.Sexuality:
-            self.color = colors["Asexual"]['rgb']
-        
-        if "ARomantical" in self.Sexuality:
-            self.color = colors["Aromantic"]['rgb']
-
-
-        if self.Sexuality in colors:
-            self.color = colors[self.Sexuality]['rgb']
-        
-
-
-    # #NOT READY TODO: FIX IT
-    # def AI(self):
-
-    #     #Random Timer Between 0, 10 Before Starting
-
-    #     if self.Move == False:
-    #         return
-
-
-    #     if self.x >= Window.WIDTH or self.x <= 0:
-    #         #Stop For 0, 5 Seconds
-    #         self.XDirection = -self.XDirection
-
-    #     if self.y >= Window.HEIGHT or self.y <= 0:
-    #         self.YDirection = -self.YDirection
+        self.Name = Name
+        self.Age = Age
+        self.SkinColor = SkinColor
+        self.EyeColor = EyeColor
+        self.Gender = Gender
+        self.Sexuality = Sexuality
+        self.Religion = Religion
 
         
-    #     #Random Timer Between 0, 20 Stopping For A While Then Complete
-    #     if self.MoveDown:
-    #         self.y += self.MovingY * self.YDirection
+        self.Position = Vector2(10, 10)
+        self.Move = random.choice([True, False])
+        self.MoveDown = random.choice([True, False])
+        self.MoveOneDirection = random.choice([True, False])
+        self.Moves = {'x': random.uniform(0, 1), 'y': random.uniform(0, 1)}
+        self.Direction = {'x': 1, 'y': 1}
+        self.Sorted = False
+        self.StartTimer = time.time()  # Initialize start time
+        self.WaitToStart = random.uniform(1, 3)  # Wait time before starting movement
+        self.WaitToChangeDirection = random.uniform(1, 3)  # Wait time before changing direction
+        self.BorderReachedTime = None  # Time when the border is reached
+        self.DelayBeforeDirectionChange = 1  # Delay before changing direction
+        self.WaitUntilDone = random.uniform(4, 15)  # Time until movement toggle
+
+        # Load sexuality colors from JSON file
+        with open("Data/SexualitiesColor.json") as file:
+            colors = json.load(file)
         
-    #     self.x += self.MovingX * self.XDirection
+        self.color = (255, 255, 255)  # Default color
+        
+        # Check for specific sexualities and set color
+        for key in ["ASexual", "ARomantical"]:
+            if key in self.Sexuality:
+                self.color = colors.get(key.lower(), {}).get('rgb', self.color)
+        
+        self.color = colors.get(self.Sexuality, {}).get('rgb', self.color)
+
+    def AI(self):
+        if not self.Sorted:
+            self.Position.x = random.randint(0, Window.WIDTH)
+            self.Position.y = random.randint(0, Window.HEIGHT)
+            self.Sorted = True
+
+        elapsed_time = time.time() - self.StartTimer
+
+        if elapsed_time >= self.WaitToStart:
+            if not self.Move:
+                return
+
+            if self.MoveDown:
+                self.Position.y += self.Moves['y'] * self.Direction['y']
+
+            if self.Position.x >= Window.WIDTH or self.Position.x < 0 or self.Position.y >= Window.HEIGHT or self.Position.y < 0:
+                if self.BorderReachedTime is None:
+                    self.BorderReachedTime = time.time()
+
+                if time.time() - self.BorderReachedTime >= self.DelayBeforeDirectionChange:
+                    if self.Position.x >= Window.WIDTH or self.Position.x < 0:
+                        if self.MoveOneDirection:
+                            self.Direction['y'] = 0
+                        else:
+                            self.Direction['y'] = 1
+                        self.Direction['x'] *= -1
+
+                    if self.Position.y >= Window.HEIGHT or self.Position.y < 0:
+                        if self.MoveOneDirection:
+                            self.Direction['x'] = 0
+                        else:
+                            self.Direction['x'] = 1
+                        self.Direction['y'] *= -1
+
+                    self.BorderReachedTime = None  # Reset the border reached time
+
+            self.Position.x += self.Moves['x'] * self.Direction['x']
+
+        if elapsed_time >= self.WaitUntilDone:
+            self.Move = random.choice([True, True, True, False])
+            self.StartTimer = time.time()  # Reset start timer for the next cycle
