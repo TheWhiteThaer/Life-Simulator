@@ -13,7 +13,9 @@ class Main(Game.Game):
 
     # Humans #
     HumansNumber = None
+    LastHumanNumber = None
     Humans = None
+
     
 
     # Counter #
@@ -36,10 +38,12 @@ class Main(Game.Game):
         self.addHumans(self.HumansNumber, self.Humans)
         super().__init__(width, height, FPS, title)
 
+
     def init_variables(self):
         # Humans #
         self.HumansNumber = 100
-        
+
+        self.LastHumanNumber = self.HumansNumber
 
         self.Humans = []
     
@@ -100,28 +104,45 @@ class Main(Game.Game):
         return super().create()
     
 
-    
+    def StandingStillHuman(self):
+        HumanYPosition = 0
+        HumanXPosition = 0
+        NumberOfPoepleInARow = CalculationUtils.Calculate_Number_Of_People_On_A_Row(self.radius, self.HumansNumber)
+        NumberOfPoepleInAColum = 5
+        for i in range(len(self.Humans)):
+            if i % NumberOfPoepleInARow == 0:
+                HumanYPosition += (Window.HEIGHT - self.radius * 2) /  NumberOfPoepleInAColum
+                HumanXPosition = 0
+
+            HumanXPosition += (Window.WIDTH - self.radius * 2) /  NumberOfPoepleInARow
+            
+            pygame.draw.circle(self.displaysurface, self.Humans[i].color, (HumanXPosition, HumanYPosition), int(self.radius))
+            self.Humans[i].Position.x = HumanXPosition
+            self.Humans[i].Position.y = HumanYPosition
+
+
+    def BehavingHuman(self):
+        Circles = []
+        
+        for human in self.Humans:
+            human.AI()
+            circle = pygame.draw.circle(self.displaysurface, human.color, (human.Position.x, human.Position.y), int(self.radius))
+            Circles.append(circle)
+
+        # Check and resolve collisions
+        for i in range(len(Circles)):
+            for j in range(i + 1, len(Circles)):
+                if CalculationUtils.check_collision(Circles[i], Circles[j], int(self.radius)):
+                    CalculationUtils.resolve_collision(self.Humans[i], self.Humans[j], int(self.radius))
+        # Redraw circles at new positions
+        for human in self.Humans:
+            pygame.draw.circle(self.displaysurface, human.color, (human.Position.x, human.Position.y), int(self.radius))
 
     def HumanManager(self, AIMode = "AI"):
         if AIMode == "Standing Still":
-            HumanYPosition = 0
-            HumanXPosition = 0
-            NumberOfPoepleInARow = CalculationUtils.Calculate_Number_Of_People_On_A_Row(self.radius, self.HumansNumber)
-            NumberOfPoepleInAColum = 5
-            for i in range(len(self.Humans)):
-                if i % NumberOfPoepleInARow == 0:
-                    HumanYPosition += (Window.HEIGHT - self.radius * 2) /  NumberOfPoepleInAColum
-                    HumanXPosition = 0
-
-                HumanXPosition += (Window.WIDTH - self.radius * 2) /  NumberOfPoepleInARow
-                
-                pygame.draw.circle(self.displaysurface, self.Humans[i].color, (HumanXPosition, HumanYPosition), int(self.radius))
-                self.Humans[i].Position.x = HumanXPosition
-                self.Humans[i].Position.y = HumanYPosition
+            self.StandingStillHuman()
         else:
-            for i in range(len(self.Humans)):
-                self.Humans[i].AI()
-                pygame.draw.circle(self.displaysurface, self.Humans[i].color, (self.Humans[i].Position.x, self.Humans[i].Position.y), int(self.radius))
+            self.BehavingHuman()            
 
 
     def IDInfo(self, IDPosition):
@@ -138,7 +159,7 @@ class Main(Game.Game):
         for i in range(0, len(Texts)):
             TextPosition[1] += 30
             Text = self.pixelSans.render(
-                f'{Texts[i][0]} : {Texts[i][1]}', 
+                f'{Texts[i][0]} : {Texts[i][1]}',
                 True, 
                 (0, 0, 0)
             )
@@ -190,24 +211,43 @@ class Main(Game.Game):
 
     def update(self):
 
+        HumansNewNumber = {
+            "Increase": self.HumansNumber + self.AddedHumans["Increase"],
+            "Decrease": self.HumansNumber + self.AddedHumans["Decrease"]
+        }
+        
+        #TODO: Fix The Radius Shit
 
-        #Calculating The Max Circ Border
+        if self.AddingOrNot != "":
+            self.HumansNumber += self.AddedHumans[self.AddingOrNot]
+            
+            if self.AddingOrNot == "Decrease":
+                if len(self.Humans) > 1:
+                    self.Humans.pop()
+            else:
+                self.addHumans(self.AddedHumans["Increase"], self.Humans)
+
+            CalculationUtils.People_Counter_Based_On_Sexuality(self.Humans, self.Counter)
+    
+            self.AddingOrNot = ""
+        
+                    
         self.radius = CalculationUtils.Calculate_Radius_Based_On_Number(self.HumansNumber)
 
-        self.HumanManager("Normal")
+        self.HumanManager("Standing Still")
 
-        CounterText = self.normalFont.render(
-            f'The Number Of {self.Sexualities[self.curSexuality]} People Is {self.Counter[self.Sexualities[self.curSexuality]]}', 
+        CounterText = self.pixelSans.render(
+            f'{self.Sexualities[self.curSexuality]} : {self.Counter[self.Sexualities[self.curSexuality]]}', 
             True, 
             (0, 0, 0)
         )
-        self.displaysurface.blit(CounterText, (0, 600))
+        self.displaysurface.blit(CounterText, (50, Window.HEIGHT - 50))
         
         self.IDLogic()
 
         if self.restart:
             self.restartSimulation()
-
+        
         self.Humans[self.curHuman].Position.x = Window.WIDTH / int(self.radius) * 6
         self.Humans[self.curHuman].Position.y = Window.HEIGHT / int(self.radius) * 6
 

@@ -13,6 +13,14 @@ class Game():
     #Id Stuff
     canShowID = False
 
+    #Increase
+    AddedHumans = {
+        "Increase" : 0,
+        "Decrease": 0
+    }
+
+    AddingOrNot = ""
+
 
     def __init__(self, width, height, FPS, title) -> None:
         self.width = width
@@ -59,7 +67,19 @@ class Game():
 
                     if event.key == pygame.K_h:
                         self.canShowID = not self.canShowID
-                      
+                    
+                    if event.key == pygame.K_EQUALS:
+                        self.AddedHumans["Increase"] += 1
+                        self.AddingOrNot = "Increase"
+                    elif event.key == pygame.K_MINUS:
+                        self.AddedHumans["Decrease"] += 1 * -1
+                        self.AddingOrNot = "Decrease"
+
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_MINUS:
+                        self.AddedHumans["Decrease"] = 0
+                    elif event.key == pygame.K_EQUALS:
+                        self.AddedHumans["Increase"] = 0
                        
             self.displaysurface.fill((255, 255, 255))
             self.update()

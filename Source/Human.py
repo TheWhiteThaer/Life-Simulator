@@ -45,12 +45,16 @@ class Human:
         self.color = colors.get(self.Sexuality, {}).get('rgb', self.color)
 
     def AI(self):
+
         if not self.Sorted:
             self.Position.x = random.randint(0, Window.WIDTH)
             self.Position.y = random.randint(0, Window.HEIGHT)
             self.Sorted = True
 
         elapsed_time = time.time() - self.StartTimer
+        
+        if elapsed_time >= self.WaitUntilDone:
+            self.Move = random.choice([True, False])
 
         if elapsed_time >= self.WaitToStart:
             if not self.Move:
@@ -81,7 +85,3 @@ class Human:
                     self.BorderReachedTime = None  # Reset the border reached time
 
             self.Position.x += self.Moves['x'] * self.Direction['x']
-
-        if elapsed_time >= self.WaitUntilDone:
-            self.Move = random.choice([True, True, True, False])
-            self.StartTimer = time.time()  # Reset start timer for the next cycle
