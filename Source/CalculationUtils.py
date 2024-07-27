@@ -2,11 +2,14 @@ import math
 import Window
 import random
 def Calculate_Radius_Based_On_Number(number):
-    return Window.WIDTH / 100
+    return Window.WIDTH / number
 
 #TODO: fix it
-def Calculate_Distance_Based_On_Number(number):
-    pass
+def Calculate_Number_Of_People_On_A_COLUM(circleR, number):
+    for i in range(0, number):
+        S = circleR * (circleR *(3/4)) * math.pi * i
+        if S >= Window.HEIGHT:
+            return i
 
 
 def Calculate_Number_Of_People_On_A_Row(circleR, number):

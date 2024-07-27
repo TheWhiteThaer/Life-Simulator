@@ -66,6 +66,13 @@ class Main(Game.Game):
             'AroAce'
         ]
 
+
+    def create(self):
+        self.normalFont = pygame.font.Font('freesansbold.ttf', 32)
+        self.pixelSans = pygame.font.Font('Assets/Fonts/SansPixels.ttf', 22)
+        CalculationUtils.People_Counter_Based_On_Sexuality(self.Humans, self.Counter)
+        
+        return super().create()
     
     
     def addHumans(self, numberOfPoeple, List):
@@ -95,13 +102,6 @@ class Main(Game.Game):
         CalculationUtils.People_Counter_Based_On_Sexuality(self.Humans, self.Counter)
         self.calculated = False
         self.restart = False
-
-    def create(self):
-        self.normalFont = pygame.font.Font('freesansbold.ttf', 32)
-        self.pixelSans = pygame.font.Font('Assets/Fonts/SansPixels.ttf', 22)
-        CalculationUtils.People_Counter_Based_On_Sexuality(self.Humans, self.Counter)
-        
-        return super().create()
     
 
     def StandingStillHuman(self):
