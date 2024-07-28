@@ -58,12 +58,15 @@ class Game():
                     elif event.key == pygame.K_RIGHT:
                         self.changeSexuality(1)
 
+
+
                     if event.key == pygame.K_d:
                         self.changeHuman(1)
-                                        
                       
                     elif event.key == pygame.K_a:                 
                         self.changeHuman(-1)
+
+
 
                     if event.key == pygame.K_h:
                         self.canShowID = not self.canShowID

@@ -1,11 +1,15 @@
-import pygame #type: ignore
-from pygame.locals import * # type: ignore
-import Human
+import pygame
 import random
+import json
+import pygame_widgets
+from pygame_widgets.slider import Slider
+from pygame_widgets.textbox import TextBox
+
+#Classes
+import Human
 import Game
 import CalculationUtils
 import Window
-import json
 import Sexuality
 
 
@@ -71,7 +75,7 @@ class Main(Game.Game):
         self.normalFont = pygame.font.Font('freesansbold.ttf', 32)
         self.pixelSans = pygame.font.Font('Assets/Fonts/SansPixels.ttf', 22)
         CalculationUtils.People_Counter_Based_On_Sexuality(self.Humans, self.Counter)
-        
+
         return super().create()
     
     
@@ -80,9 +84,7 @@ class Main(Game.Game):
             # Load human data from JSON file
             with open("Data/Humans.json") as file:
                 humans = json.load(file)
-            
             human = random.choice(humans)
-
             newHuman = Human.Human(
                 human['name'],
                 human['age'],
@@ -121,6 +123,7 @@ class Main(Game.Game):
             self.Humans[i].Position.y = HumanYPosition
 
 
+    
     def BehavingHuman(self):
         Circles = []
         
@@ -138,11 +141,13 @@ class Main(Game.Game):
         for human in self.Humans:
             pygame.draw.circle(self.displaysurface, human.color, (human.Position.x, human.Position.y), int(self.radius))
 
+
+
     def HumanManager(self, AIMode = "AI"):
-        if AIMode == "Standing Still":
+        if AIMode == "Normal":
             self.StandingStillHuman()
         else:
-            self.BehavingHuman()            
+            self.BehavingHuman()   
 
 
     def IDInfo(self, IDPosition):
@@ -209,29 +214,28 @@ class Main(Game.Game):
 
         self.IDInfo(IDPosition)
 
+    
+    def AddingMechanics(self):
+        self.HumansNumber += self.AddedHumans[self.AddingOrNot]
+        
+        if self.AddingOrNot == "Decrease":
+            if len(self.Humans) > 1:
+                self.Humans.pop()
+        else:
+            self.addHumans(self.AddedHumans["Increase"], self.Humans)
+
+        CalculationUtils.People_Counter_Based_On_Sexuality(self.Humans, self.Counter)
+        
+        
+    
+    
     def update(self):
 
-        HumansNewNumber = {
-            "Increase": self.HumansNumber + self.AddedHumans["Increase"],
-            "Decrease": self.HumansNumber + self.AddedHumans["Decrease"]
-        }
-        
-        #TODO: Fix The Radius Shit
-
         if self.AddingOrNot != "":
-            self.HumansNumber += self.AddedHumans[self.AddingOrNot]
-            
-            if self.AddingOrNot == "Decrease":
-                if len(self.Humans) > 1:
-                    self.Humans.pop()
-            else:
-                self.addHumans(self.AddedHumans["Increase"], self.Humans)
-
-            CalculationUtils.People_Counter_Based_On_Sexuality(self.Humans, self.Counter)
-    
+            self.AddingMechanics()
             self.AddingOrNot = ""
         
-                    
+
         self.radius = CalculationUtils.Calculate_Radius_Based_On_Number(self.HumansNumber)
 
         self.HumanManager("Standing Still")
